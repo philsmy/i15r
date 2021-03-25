@@ -51,6 +51,7 @@ class I15R
         if line !~ /[[:alpha:]]/
           new_line
         else
+          unless new_line.include? ['script', 'img', 'svg']
           PATTERNS[@file_type].detect do |pattern|
             if m = pattern.match(line)
               m.names.each do |group_name|
@@ -59,6 +60,7 @@ class I15R
                 end
               end
             end
+          end
           end
         end
         if block_given? and line != new_line
