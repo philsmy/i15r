@@ -28,6 +28,10 @@ class I15R
     def override_i18n_method
       @options.fetch(:override_i18n_method, nil)
     end
+
+    def max_key_length
+      @options.fetch(:max_key_length, 150)
+    end
   end
 
   attr_reader :config

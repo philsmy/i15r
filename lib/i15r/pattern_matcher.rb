@@ -40,7 +40,7 @@ class I15R
     def translation_key(text)
       #TODO: downcase does not work properly for accented chars, like 'Ú', see function in ActiveSupport that deals with this
       #TODO: [:punct:] would be nice but it includes _ which we don't want to remove
-      key = text.strip.downcase.gsub(/[\s\/]+/, '_').gsub(/[!?.,:"';()#\/\\]/, '')
+      key = text.strip.downcase.gsub(/[\s\/]+/, '_').gsub(/[!?.,:"';()#\/\\]/, '').slice(0, options[:max_key_length])
       "#{@prefix}.#{key}"
     end
 
