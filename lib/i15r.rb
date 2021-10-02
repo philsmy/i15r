@@ -2,7 +2,7 @@ require 'i15r/pattern_matcher'
 require 'i15r/locale_creator'
 
 class I15R
-  class AppFolderNotFound < Exception; end
+  class AppFolderNotFound < RuntimeError; end
 
   class Config
     def initialize(config)
@@ -36,7 +36,7 @@ class I15R
 
   attr_reader :config
 
-  def initialize(reader, writer, printer, config={})
+  def initialize(reader, writer, printer, config = {})
     @reader = reader
     @writer = writer
     @printer = printer
@@ -50,15 +50,16 @@ class I15R
 
   def file_path_to_message_prefix(file)
     segments = File.expand_path(file).split('/').reject { |segment| segment.empty? }
-    subdir = %w(views helpers controllers models).find do |app_subdir|
-       segments.index(app_subdir)
+    subdir = %w[views helpers controllers models].find do |app_subdir|
+      segments.index(app_subdir)
     end
     if subdir.nil?
       raise AppFolderNotFound, "No app. subfolders were found to determine prefix. Path is #{File.expand_path(file)}"
     end
+
     first_segment_index = segments.index(subdir) + 1
     file_name_without_extensions = segments.last.split('.').first
-    if file_name_without_extensions and file_name_without_extensions[0] == '_'
+    if file_name_without_extensions && (file_name_without_extensions[0] == '_')
       file_name_without_extensions = file_name_without_extensions[1..-1]
     end
     path_segments = segments.slice(first_segment_index...-1)
@@ -79,7 +80,7 @@ class I15R
     text = @reader.read(path)
     template_type = path[/(?:.*)\.(.*)$/, 1]
     @printer.println("#{path}:")
-    @printer.println("")
+    @printer.println('')
     i18ned_text = sub_plain_strings(text, full_prefix(path), template_type.to_sym)
     @writer.write(path, i18ned_text) unless config.dry_run?
   end
@@ -88,8 +89,9 @@ class I15R
     pm = I15R::PatternMatcher.new(prefix,
                                   file_type,
                                   @locale_creator,
-                                  :add_default => config.add_default,
-                                  :override_i18n_method => config.override_i18n_method)
+                                  add_default: config.add_default,
+                                  override_i18n_method: config.override_i18n_method,
+                                  max_key_length: config.max_key_length)
     transformed_text = pm.run(text) do |old_line, new_line|
       @printer.print_diff(old_line, new_line)
     end
@@ -97,8 +99,8 @@ class I15R
   end
 
   def internationalize!(path)
-    @printer.println "Running in dry-run mode" if config.dry_run?
-    path = "app" if path.nil?
+    @printer.println 'Running in dry-run mode' if config.dry_run?
+    path = 'app' if path.nil?
     files = File.directory?(path) ? Dir.glob("#{path}/**/*.{erb,haml}") : [path]
     files.each { |file| internationalize_file(file) }
     @locale_creator.save_file
@@ -107,5 +109,4 @@ class I15R
   def include_path?
     config.prefix_with_path || !config.prefix
   end
-
 end
